@@ -1,4 +1,4 @@
-.PHONY: build up down test test-unit fix-cs install shell logs clean
+.PHONY: build up down test test-unit phpstan rector fix-cs install shell logs clean
 
 # Build the Docker image
 build:
@@ -22,6 +22,9 @@ test: up
 
 phpstan: up
 	docker compose exec php vendor/bin/phpstan
+
+rector: up
+	docker compose exec php vendor/bin/rector
 
 # Run unit tests specifically
 test-unit: up
