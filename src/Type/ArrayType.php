@@ -9,13 +9,10 @@ class ArrayType extends PrimitiveType
     use SingletonScaffold;
 
     /**
-     * @var mixed $value
-     *
+     * @return array<mixed>
      * @throws WrongTypeException
-     *
-     * @returns array
      */
-    public function cast($value)
+    public function cast(mixed $value): array
     {
         if (!is_array($value)) {
             self::throwWrongTypeFor($value, 'array');

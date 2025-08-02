@@ -9,13 +9,9 @@ class StringType extends PrimitiveType
     use SingletonScaffold;
 
     /**
-     * @var mixed $value
-     *
      * @throws WrongTypeException
-     *
-     * @returns string
      */
-    public function cast($value)
+    public function cast(mixed $value): string
     {
         if (is_string($value)) {
             return $value;
@@ -26,9 +22,11 @@ class StringType extends PrimitiveType
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
         }
-        if (method_exists($value, '__toString')) {
+        if ($value instanceof \Stringable) {
             return $value->__toString();
         }
         self::throwWrongTypeFor($value, 'string');
+
+        return ''; // Unreachable but PHPStan cannot detect this
     }
 }

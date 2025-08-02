@@ -4,22 +4,14 @@ namespace Precious\PHPStan\Reflection;
 
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\PropertyReflection;
+use PHPStan\TrinaryLogic;
 use PHPStan\Type\Type;
 
 class Property implements PropertyReflection
 {
-    /** @var string */
-    private $name;
+    private ClassReflection $class;
 
-    /** @var Type */
-    private $type;
-
-    /** @var ClassReflection */
-    private $class;
-
-    public function __construct(string $name, Type $type) {
-        $this->name = $name;
-        $this->type = $type;
+    public function __construct(private readonly string $name, private readonly Type $type) {
     }
 
     public function inClass(ClassReflection $class) : void
@@ -27,7 +19,22 @@ class Property implements PropertyReflection
         $this->class = $class;
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public function getType() : Type
+    {
+        return $this->type;
+    }
+
+    public function getReadableType(): Type
+    {
+        return $this->type;
+    }
+
+    public function getWritableType(): Type
     {
         return $this->type;
     }
@@ -60,5 +67,31 @@ class Property implements PropertyReflection
     public function isWritable() : bool
     {
         return false;
+    }
+
+    public function isInternal() : TrinaryLogic
+    {
+        return TrinaryLogic::createMaybe();
+    }
+
+    public function isDeprecated() : TrinaryLogic
+    {
+        return TrinaryLogic::createNo();
+    }
+
+    public function canChangeTypeAfterAssignment() : bool
+    {
+        return false;
+    }
+
+    public function getDeprecatedDescription() : ?string
+    {
+        return null;
+    }
+
+    public function getDocComment() : ?string
+    {
+        // TODO: implement
+        return null;
     }
 }

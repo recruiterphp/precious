@@ -4,55 +4,50 @@ namespace Precious;
 
 use Iterator;
 
+/**
+ * @implements Iterator<int, Field>
+ */
 class Fields implements Iterator
 {
-    /**
-     * @var int
-     */
-    private $position;
+    private int $position;
 
     /**
-     * @var array<Field>
-     */
-    private $fields;
-
-    /**
-     * @var array<Field> $fields
+     * @param array<Field> $fields
      * @throws NameClashFieldException
      * @returns self
      */
-    public function __construct(array $fields) {
+    public function __construct(private readonly array $fields) {
         $this->position = 0;
-        $this->fields = $fields;
         self::ensureUniqueNames(
             array_map(function($field) { return $field->name(); }, $fields)
         );
     }
 
-    public function rewind() {
+    public function rewind(): void {
         $this->position = 0;
     }
 
-    public function current() {
+    public function current(): Field {
         return $this->fields[$this->position];
     }
 
-    public function key() {
+    public function key(): int {
         return $this->position;
     }
 
-    public function next() {
+    public function next(): void {
         ++$this->position;
     }
 
-    public function valid() {
+    public function valid(): bool {
         return isset($this->fields[$this->position]);
     }
 
     /**
+     * @param array<string> $declaredNames;
      * @throws NameClashFieldException
      */
-    private static function ensureUniqueNames(array $declaredNames) : void
+    private static function ensureUniqueNames(array $declaredNames): void
     {
         $uniqueNames = array_unique($declaredNames);
         if (count($declaredNames) !== count($uniqueNames)) {

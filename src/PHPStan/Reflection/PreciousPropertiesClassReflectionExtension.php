@@ -3,29 +3,17 @@
 namespace Precious\PHPStan\Reflection;
 
 use PHPStan\Broker\Broker;
-use PHPStan\Reflection\BrokerAwareExtension;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\PropertiesClassReflectionExtension;
 use PHPStan\Reflection\PropertyReflection;
+use PHPStan\Reflection\ReflectionProvider;
 use Precious\Precious;
 
-class PreciousPropertiesClassReflectionExtension implements PropertiesClassReflectionExtension, BrokerAwareExtension
+class PreciousPropertiesClassReflectionExtension implements PropertiesClassReflectionExtension
 {
-    /** @var Broker */
-    private $broker;
-
     /** @var array<array<Property>> */
-    private $properties;
+    private array $properties;
 
-    /**
-     * @param Broker $broker Class reflection broker
-     * @return void
-     */
-    public function setBroker(Broker $broker) : void
-    {
-        $this->broker = $broker;
-        $this->properties = [];
-    }
 
     /**
      * @param ClassReflection $classReflection

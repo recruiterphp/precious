@@ -10,52 +10,50 @@ use JsonSerializable;
 abstract class Precious implements JsonSerializable
 {
     /**
-     * @var array
+     * @var array<mixed>
      */
-    private $parameters = [];
+    private readonly array $parameters;
 
     /**
      * @var array<Fields>
      */
-    private static $fields = [];
+    private static array $fields = [];
 
     /**
      * Returns a new instance of a value object
      *
+     * @param array<mixed> $candidateParameters
      * @throws NameClashFieldException
      * @throws MissingRequiredFieldException
      * @throws MissingRequiredFieldException
      * @throws WrongTypeFieldException
      * @returns self
      */
-    public function __construct(array $parameters = [])
+    public final function __construct(array $candidateParameters = [])
     {
         if (!array_key_exists(static::class, self::$fields)) {
             self::$fields[static::class] = new Fields($this->init());
         }
+        $parameters = [];
         /** @var Field $field */
         foreach (self::$fields[static::class] as $field) {
-            $this->parameters[$field->name()] = $field->pickIn($parameters);
+            $parameters[$field->name()] = $field->pickIn($candidateParameters);
         }
+
+        $this->parameters = $parameters;
     }
 
     /**
-     * @var string $name
-     * @var mixed $value
      * @throws MissingRequiredFieldException
      * @throws WrongTypeFieldException
-     * @returns static
+     * @throws NameClashFieldException
      */
-    public function set(string $name, $value)
+    public function set(string $name, mixed $value): static
     {
         return new static(array_merge($this->parameters, [$name => $value]));
     }
 
-    /**
-     * @var string $name
-     * @returns bool
-     */
-    public function has(string $name) : bool
+    public function has(string $name): bool
     {
         return array_key_exists($name, $this->parameters);
     }
@@ -63,10 +61,9 @@ abstract class Precious implements JsonSerializable
     /**
      * Unsafe version, use only as last resource
      *
-     * @var string $name
      * @returns mixed The field value or null if missing
      */
-    public function get(string $name)
+    public function get(string $name): mixed
     {
         if (!array_key_exists($name, $this->parameters)) {
             return null;
@@ -74,7 +71,7 @@ abstract class Precious implements JsonSerializable
         return $this->parameters[$name];
     }
 
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         if (!array_key_exists($name, $this->parameters)) {
             throw new UnknownFieldException("Unknown field `$name`");
@@ -82,7 +79,7 @@ abstract class Precious implements JsonSerializable
         return $this->parameters[$name];
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
         if (!array_key_exists($name, $this->parameters)) {
             throw new UnknownFieldException("Unknown field `$name`");
@@ -90,11 +87,14 @@ abstract class Precious implements JsonSerializable
         throw new ReadOnlyFieldException("Cannot write field `$name`");
     }
 
-    public function __isset($name): bool
+    public function __isset(string $name): bool
     {
         return array_key_exists($name, $this->parameters);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function jsonSerialize(): array
     {
         return $this->parameters;
@@ -102,12 +102,14 @@ abstract class Precious implements JsonSerializable
 
     /**
      * Returns a new instance where the given fields replace existing ones.
+     * @param array<mixed> $parameters
+     * @throws MissingRequiredFieldException
+     * @throws WrongTypeFieldException
+     * @throws NameClashFieldException
      */
-    public function with(array $parameters = [])
+    public function with(array $parameters = []): static
     {
-        $class = static::class;
-
-        return new $class(array_merge(
+        return new static(array_merge(
             $this->parameters,
             $parameters
         ));
@@ -118,7 +120,7 @@ abstract class Precious implements JsonSerializable
         return new RequiredField($fieldName, $fieldType);
     }
 
-    protected static function optional(string $fieldName, Type $fieldType, $defaultValue = null) : Field
+    protected static function optional(string $fieldName, Type $fieldType, mixed $defaultValue = null): Field
     {
         return new OptionalField($fieldName, $fieldType, $defaultValue);
     }

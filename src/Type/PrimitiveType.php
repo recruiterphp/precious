@@ -42,11 +42,9 @@ abstract class PrimitiveType implements Singleton, Type
     }
 
     /**
-     * @var mixed $value
-     *
      * @throws WrongTypeException
      */
-    protected static function throwWrongTypeFor($value, $expectedType) : void
+    protected static function throwWrongTypeFor(mixed $value, string $expectedType): void
     {
         $currentType = gettype($value);
         throw new WrongTypeException(

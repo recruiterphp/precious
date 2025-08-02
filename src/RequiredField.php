@@ -7,20 +7,8 @@ use Precious\Type\WrongTypeException;
 
 class RequiredField implements Field
 {
-    /**
-     * @var string $name
-     */
-    private $name;
-
-    /**
-     * @var Type $type
-     */
-    private $type;
-
-    public function __construct(string $name, Type $type)
+    public function __construct(private readonly string $name, private readonly Type $type)
     {
-        $this->name = $name;
-        $this->type = $type;
     }
 
     /**
@@ -28,7 +16,7 @@ class RequiredField implements Field
      *
      * @returns string
      */
-    public function name()
+    public function name(): string
     {
         return $this->name;
     }
@@ -36,11 +24,11 @@ class RequiredField implements Field
     /**
      * Returns the value of the field picked from an array of values
      *
+     * @param array<mixed> $parameters
      * @throws WrongTypeFieldException
      * @throws MissingRequiredFieldException
-     * @returns mixed
      */
-    public function pickIn(array $parameters)
+    public function pickIn(array $parameters): mixed
     {
         if (!array_key_exists($this->name, $parameters)) {
             throw new MissingRequiredFieldException(
@@ -51,11 +39,9 @@ class RequiredField implements Field
     }
 
     /**
-     * @var mixed $value
      * @throws WrongTypeFieldException
-     * @returns mixed
      */
-    protected function cast($value)
+    protected function cast(mixed $value): mixed
     {
         try {
             return $this->type->cast($value);
