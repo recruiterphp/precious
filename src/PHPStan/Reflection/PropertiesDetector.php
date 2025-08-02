@@ -3,6 +3,7 @@
 namespace Precious\PHPStan\Reflection;
 
 use Exception;
+use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\BooleanType;
 use PHPStan\Type\FloatType;
@@ -35,29 +36,26 @@ use Precious\Precious;
 class PropertiesDetector extends NodeVisitorAbstract
 {
     /** @var array<array<Property>> */
-    private $properties;
+    private array $properties;
+
+    private ?Node $inPreciousClass;
 
     /** @var ?Node */
-    private $inPreciousClass;
+    private ?Node $inPreciousClassInitMethod;
 
-    /** @var ?Node */
-    private $inPreciousClassInitMethod;
+    /** @var array<string> */
+    private array $names;
 
-    /** @var array */
-    private $names;
-
-    /** @var string */
-    private $namespace;
+    private string $namespace;
 
     /**
      * Properties defined per classes in file
      *
-     * @var string $filePath
-     * @returns array<array<Property>>
+     * @return array<array<Property>>
      */
-    public static function inFile(string $filePath) : array
+    public static function inFile(string $filePath): array
     {
-        $parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
+        $parser = new ParserFactory()->createForHostVersion();
         $fileContent = file_get_contents($filePath);
         if (!$fileContent) {
             return [];
@@ -72,10 +70,10 @@ class PropertiesDetector extends NodeVisitorAbstract
     /**
      * Properties defined per classes in ast
      *
-     * @var array<Node> $ast
-     * @returns array<array<Property>>
+     * @param array<Node> $ast
+     * @return array<array<Property>>
      */
-    public static function inAst(array $ast) : array
+    public static function inAst(array $ast): array
     {
         $nameResolver = new NameResolver();
         $propertiesDetector = new self();
@@ -94,7 +92,11 @@ class PropertiesDetector extends NodeVisitorAbstract
         // echo PHP_EOL;
     }
 
-    public function enterNode(Node $node)
+    /**
+     * @throws ShouldNotHappenException
+     * @throws Exception
+     */
+    public function enterNode(Node $node): null
     {
         if ($node instanceof Namespace_) {
             $this->namespace = (string) $node->name;
@@ -114,22 +116,26 @@ class PropertiesDetector extends NodeVisitorAbstract
         if ($node instanceof Class_ && Precious::class === (string) $node->extends) {
             $this->inPreciousClass = $node;
             // echo '> Precious class ' . $node->namespacedName . PHP_EOL;
-            return;
+            return null;
         }
         if ($node instanceof ClassMethod && $this->inPreciousClass && $node->isProtected() && 'init' === (string) $node->name) {
             $this->inPreciousClassInitMethod = $node;
             // echo '> Precious init method' . PHP_EOL;
-            return;
+            return null;
         }
         if ($node instanceof StaticCall && $this->inPreciousClassInitMethod) {
             if ($node->name instanceof Identifier && ('required' === (string) $node->name || 'optional' == (string) $node->name)) {
                 // TODO: throw exception if arguments are not what we expect
                 $isOptional = ((string) $node->name) === 'optional';
                 $hasDefault = count($node->args) === 3;
-                assert($node->args[0]->value instanceof String_);
-                $propertyName = $this->extractPropertyName($node->args[0]->value);
-                assert($node->args[1]->value instanceof StaticCall);
-                $propertyType = $this->extractPropertyType($node->args[1]->value);
+                assert($node->args[0] instanceof Arg);
+                $value = $node->args[0]->value;
+                assert($value instanceof String_);
+                $propertyName = $this->extractPropertyName($value);
+                assert($node->args[1] instanceof Arg);
+                $value = $node->args[1]->value;
+                assert($value instanceof StaticCall);
+                $propertyType = $this->extractPropertyType($value);
                 if ($isOptional && !$hasDefault) {
                     $propertyType = new UnionType([new NullType(), $propertyType]);
                 }
@@ -142,9 +148,11 @@ class PropertiesDetector extends NodeVisitorAbstract
                 // echo '= Precious property ' . $propertyName . ':' . get_class($propertyType) . PHP_EOL;
             }
         }
+
+        return null;
     }
 
-    public function leaveNode(Node $node)
+    public function leaveNode(Node $node): null
     {
         if ($node instanceof Namespace_) {
             $this->namespace = '';
@@ -152,13 +160,13 @@ class PropertiesDetector extends NodeVisitorAbstract
         if ($node instanceof Class_ && Precious::class === (string) $node->extends) {
             $this->inPreciousClass = null;
             // echo '< Precious class ' . $node->namespacedName . PHP_EOL;
-            return;
+            return null;
         }
         if ($node instanceof ClassMethod && $this->inPreciousClass && $node->isProtected() && 'init' === (string) $node->name) {
             $this->inPreciousClassInitMethod = null;
             // echo '< Precious init method' . PHP_EOL;
-            return;
         }
+        return null;
     }
 
     private function extractPropertyName(String_ $node) : string
@@ -166,6 +174,9 @@ class PropertiesDetector extends NodeVisitorAbstract
         return $node->value;
     }
 
+    /**
+     * @throws Exception
+     */
     private function extractPropertyType(StaticCall $node) : Type
     {
         assert($node->name instanceof Identifier);
@@ -184,16 +195,12 @@ class PropertiesDetector extends NodeVisitorAbstract
                 return new NullType();
             case 'instanceOf':
                 assert($node->args[0] instanceof Arg);
-                switch (get_class($node->args[0]->value)) {
-                    case String_::class:
-                        assert($node->args[0]->value instanceof String_);
-                        return new ObjectType($node->args[0]->value->value);
-                    case ClassConstFetch::class:
-                        assert($node->args[0]->value instanceof ClassConstFetch);
-                        return new ObjectType($this->fullyQualifiedNameOf($node->args[0]->value));
-                    default:
-                        return new MixedType();
-                }
+                $value = $node->args[0]->value;
+                return match (get_class($value)) {
+                    String_::class => new ObjectType($value->value),
+                    ClassConstFetch::class => new ObjectType($this->fullyQualifiedNameOf($value)),
+                    default => new MixedType(),
+                };
             default:
                 return new MixedType();
         }

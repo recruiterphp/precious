@@ -9,13 +9,9 @@ class IntegerType extends PrimitiveType
     use SingletonScaffold;
 
     /**
-     * @var mixed $value
-     *
      * @throws WrongTypeException
-     *
-     * @returns int
      */
-    public function cast($value)
+    public function cast(mixed $value): int
     {
         if (!is_numeric($value)) {
             self::throwWrongTypeFor($value, 'integer');

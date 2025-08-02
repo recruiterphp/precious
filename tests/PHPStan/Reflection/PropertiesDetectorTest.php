@@ -20,7 +20,7 @@ use Precious\Example\OneRequiredPropertyPerType;
 
 class PropertiesDetectorTest extends TestCase
 {
-    public function testOneRequiredProperty()
+    public function testOneRequiredProperty(): void
     {
         $properties = PropertiesDetector::inFile(__DIR__ . '/data/OneRequiredProperty.php');
         $this->assertCount(1, $properties);
@@ -31,7 +31,7 @@ class PropertiesDetectorTest extends TestCase
         $this->assertEquals($properties['a'], new Property('a', new IntegerType()));
     }
 
-    public function testOneOptionalProperty()
+    public function testOneOptionalProperty(): void
     {
         $properties = PropertiesDetector::inFile(__DIR__ . '/data/OneOptionalProperty.php');
         $this->assertCount(1, $properties);
@@ -42,7 +42,7 @@ class PropertiesDetectorTest extends TestCase
         $this->assertEquals($properties['a'], new Property('a', new IntegerType()));
     }
 
-    public function testOneOptionalNullableProperty()
+    public function testOneOptionalNullableProperty(): void
     {
         $properties = PropertiesDetector::inFile(__DIR__ . '/data/OneOptionalNullableProperty.php');
         $this->assertCount(1, $properties);
@@ -53,7 +53,7 @@ class PropertiesDetectorTest extends TestCase
         $this->assertEquals($properties['a'], new Property('a', new UnionType([new NullType(), new IntegerType()])));
     }
 
-    public function testOneRequiredPropertyPerType()
+    public function testOneRequiredPropertyPerType(): void
     {
         $properties = PropertiesDetector::inFile(__DIR__ . '/data/OneRequiredPropertyPerType.php');
         $this->assertCount(1, $properties);
@@ -71,7 +71,7 @@ class PropertiesDetectorTest extends TestCase
         $this->assertEquals($properties['h'], new Property('h', new ObjectType('Precious\Precious')));
     }
 
-    public function testFullyQualifiedClassNameBarrage()
+    public function testFullyQualifiedClassNameBarrage(): void
     {
         $properties = PropertiesDetector::inFile(__DIR__ . '/data/FullyQualifiedClassNameBarrage.php');
         $this->assertCount(1, $properties);

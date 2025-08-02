@@ -2,6 +2,7 @@
 
 namespace Precious;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Precious\MissingRequiredFieldException;
 use Precious\UnknownFieldException;
@@ -76,9 +77,7 @@ class PreciousTest extends TestCase
         $a = new A(['a1' => null, 'a2' => 'aaa', 'a3' => 2]);
     }
 
-    /**
-     * @dataProvider wrongTypes
-     */
+    #[DataProvider('wrongTypes')]
     public function testWrongType($parameters)
     {
         $this->expectException(WrongTypeFieldException::class);
@@ -86,7 +85,7 @@ class PreciousTest extends TestCase
         $b = new B($parameters);
     }
 
-    public function wrongTypes()
+    public static function wrongTypes(): array
     {
         return [
             // [['integer' => 1, 'float' => 1.1, 'boolean' => true, 'string' => 'foo', 'null' => null, 'mixed' => 'whatever', 'array' => [1, 2, 3]]],

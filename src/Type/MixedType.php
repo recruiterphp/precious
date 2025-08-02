@@ -8,14 +8,7 @@ class MixedType extends PrimitiveType
 {
     use SingletonScaffold;
 
-    /**
-     * @var mixed $value
-     *
-     * @throws WrongTypeException
-     *
-     * @returns mixed
-     */
-    public function cast($value)
+    public function cast(mixed $value): mixed
     {
         return $value;
     }

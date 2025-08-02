@@ -4,13 +4,11 @@ namespace Precious\Type;
 
 use Exception;
 
-class ClassType implements Type
+readonly class ClassType implements Type
 {
     /**
-     * @var string
+     * @throws Exception
      */
-    private $class;
-
     public static function instanceOf(string $class) : self
     {
         if (!class_exists($class) && !interface_exists($class)) {
@@ -19,19 +17,14 @@ class ClassType implements Type
         return new self($class);
     }
 
-    private function __construct(string $class)
+    private function __construct(private string $class)
     {
-        $this->class = $class;
     }
 
     /**
-     * @var mixed $value
-     *
      * @throws WrongTypeException
-     *
-     * @return ?object
      */
-    public function cast($value)
+    public function cast(mixed $value): ?object
     {
         if (is_null($value)) {
             return null;

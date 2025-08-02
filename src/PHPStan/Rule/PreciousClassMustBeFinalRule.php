@@ -3,21 +3,22 @@
 namespace Precious\PHPStan\Rule;
 
 use PHPStan\Analyser\Scope;
-use PHPStan\Broker\Broker;
+use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
+use PHPStan\Rules\RuleError;
+use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\ShouldNotHappenException;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Class_;
 use Precious\Precious;
 
-class PreciousClassMustBeFinalRule implements Rule
+/**
+ * @implements Rule<Class_>
+ */
+readonly class PreciousClassMustBeFinalRule implements Rule
 {
-    /** @var Broker */
-	private $broker;
-
-	public function __construct(Broker $broker)
+	public function __construct(private ReflectionProvider $broker)
 	{
-		$this->broker = $broker;
 	}
 
     /**
@@ -32,7 +33,7 @@ class PreciousClassMustBeFinalRule implements Rule
 	 * @param Node $node
 	 * @param Scope $scope
 	 * @throws ShouldNotHappenException
-	 * @return array<string> errors
+	 * @return array<RuleError> errors
 	 */
     public function processNode(Node $node, Scope $scope): array
 	{
@@ -49,6 +50,7 @@ class PreciousClassMustBeFinalRule implements Rule
         if ($currentClassReflection->isFinal()) {
             return [];
         }
-        return ['A subclass of Precious\Precious must be declared final'];
+
+        return [RuleErrorBuilder::message('A subclass of Precious\Precious must be declared final')->build()];
     }
 }

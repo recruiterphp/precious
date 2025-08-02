@@ -9,13 +9,9 @@ class FloatType extends PrimitiveType
     use SingletonScaffold;
 
     /**
-     * @var mixed $value
-     *
      * @throws WrongTypeException
-     *
-     * @returns float
      */
-    public function cast($value)
+    public function cast(mixed $value): float
     {
         if (!is_numeric($value)) {
             self::throwWrongTypeFor($value, 'float');
