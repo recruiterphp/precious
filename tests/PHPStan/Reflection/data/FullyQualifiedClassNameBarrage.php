@@ -12,7 +12,7 @@ final class FullyQualifiedClassNameBarrage extends Precious
     protected function init() : array
     {
         return [
-            self::required('a', self::instanceOf('Precious\Precious')),
+            self::required('a', self::instanceOf(\Precious\Precious::class)),
             self::required('b', self::instanceOf(\PHPStan\Type\Type::class)),
             self::required('c', self::instanceOf(IntegerType::class)),
             self::required('d', self::instanceOf(Type\FloatType::class)),

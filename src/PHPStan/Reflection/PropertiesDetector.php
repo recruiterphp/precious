@@ -38,10 +38,10 @@ class PropertiesDetector extends NodeVisitorAbstract
     /** @var array<array<Property>> */
     private array $properties;
 
-    private ?Node $inPreciousClass;
+    private ?Node $inPreciousClass = null;
 
     /** @var ?Node */
-    private ?Node $inPreciousClassInitMethod;
+    private ?Node $inPreciousClassInitMethod = null;
 
     /** @var array<string> */
     private array $names;
@@ -196,7 +196,7 @@ class PropertiesDetector extends NodeVisitorAbstract
             case 'instanceOf':
                 assert($node->args[0] instanceof Arg);
                 $value = $node->args[0]->value;
-                return match (get_class($value)) {
+                return match ($value::class) {
                     String_::class => new ObjectType($value->value),
                     ClassConstFetch::class => new ObjectType($this->fullyQualifiedNameOf($value)),
                     default => new MixedType(),
@@ -208,7 +208,7 @@ class PropertiesDetector extends NodeVisitorAbstract
 
     private function fullyQualifiedNameOf(ClassConstFetch $node) : string
     {
-        switch (get_class($node->class)) {
+        switch ($node->class::class) {
             case FullyQualified::class:
                 return (string) $node->class;
             case Name::class:
@@ -221,7 +221,7 @@ class PropertiesDetector extends NodeVisitorAbstract
                 return (string) Name::concat($this->namespace, $node->class);
             default:
                 throw new Exception(
-                    'Unable to get fully qualified name of a PhpParser\Node of kind `' . get_class($node->class) . '`'
+                    'Unable to get fully qualified name of a PhpParser\Node of kind `' . $node->class::class . '`'
                 );
         }
     }

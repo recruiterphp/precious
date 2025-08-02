@@ -6,12 +6,9 @@ use Precious\Type\Type;
 
 class OptionalField extends RequiredField
 {
-    private mixed $defaultValue;
-
-    public function __construct(string $name, Type $type, mixed $defaultValue)
+    public function __construct(string $name, Type $type, private readonly mixed $defaultValue)
     {
         parent::__construct($name, $type);
-        $this->defaultValue = $defaultValue;
     }
 
     /**
@@ -22,12 +19,13 @@ class OptionalField extends RequiredField
      *
      * @returns mixed
      */
+    #[\Override]
     public function pickIn(array $parameters): mixed
     {
         try {
             return parent::pickIn($parameters);
 
-        } catch (MissingRequiredFieldException $e) {
+        } catch (MissingRequiredFieldException) {
             if (null === $this->defaultValue) {
                 return null;
             }

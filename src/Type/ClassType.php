@@ -36,7 +36,7 @@ readonly class ClassType implements Type
             );
         }
         if (!($value instanceof $this->class)) {
-            $currentClass = get_class($value);
+            $currentClass = $value::class;
             throw new WrongTypeException(
                 "Value is not an instance of `{$this->class}` but an instance of `{$currentClass}`"
             );

@@ -16,7 +16,8 @@
     "ergebnis/composer-normalize": "^2.47",
     "nikic/php-parser": "^5.6",
     "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^12.3"
+    "phpunit/phpunit": "^12.3",
+    "rector/rector": "^2.1"
   },
   "replace": {
     "gabrielelana/precious": "self.version"

@@ -16,7 +16,7 @@ final class OneRequiredPropertyPerType extends Precious
             self::required('e', self::arrayType()),
             self::required('f', self::nullType()),
             self::required('g', self::mixedType()),
-            self::required('h', self::instanceOf('Precious\Precious')),
+            self::required('h', self::instanceOf(\Precious\Precious::class)),
         ];
     }
 }

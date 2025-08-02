@@ -10,13 +10,16 @@ use PHPStan\Type\MixedType;
 use PHPStan\Type\NullType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\StringType;
+use PHPStan\Type\Type;
 use PHPStan\Type\UnionType;
 use PHPUnit\Framework\TestCase;
+use Precious\Example\C;
 use Precious\Example\FullyQualifiedClassNameBarrage;
 use Precious\Example\OneOptionalProperty;
 use Precious\Example\OneOptionalNullableProperty;
 use Precious\Example\OneRequiredProperty;
 use Precious\Example\OneRequiredPropertyPerType;
+use Precious\Precious;
 
 class PropertiesDetectorTest extends TestCase
 {
@@ -68,7 +71,7 @@ class PropertiesDetectorTest extends TestCase
         $this->assertEquals($properties['e'], new Property('e', new ArrayType(new MixedType(), new MixedType())));
         $this->assertEquals($properties['f'], new Property('f', new NullType()));
         $this->assertEquals($properties['g'], new Property('g', new MixedType()));
-        $this->assertEquals($properties['h'], new Property('h', new ObjectType('Precious\Precious')));
+        $this->assertEquals($properties['h'], new Property('h', new ObjectType(Precious::class)));
     }
 
     public function testFullyQualifiedClassNameBarrage(): void
@@ -79,12 +82,12 @@ class PropertiesDetectorTest extends TestCase
 
         $properties = $properties[FullyQualifiedClassNameBarrage::class];
         $this->assertCount(7, $properties);
-        $this->assertEquals($properties['a'], new Property('a', new ObjectType('Precious\Precious')));
-        $this->assertEquals($properties['b'], new Property('b', new ObjectType('PHPStan\Type\Type')));
-        $this->assertEquals($properties['c'], new Property('c', new ObjectType('PHPStan\Type\IntegerType')));
-        $this->assertEquals($properties['d'], new Property('d', new ObjectType('PHPStan\Type\FloatType')));
-        $this->assertEquals($properties['e'], new Property('e', new ObjectType('PHPStan\Type\ObjectType')));
-        $this->assertEquals($properties['f'], new Property('f', new ObjectType('Precious\Precious')));
-        $this->assertEquals($properties['h'], new Property('h', new ObjectType('Precious\Example\C')));
+        $this->assertEquals($properties['a'], new Property('a', new ObjectType(Precious::class)));
+        $this->assertEquals($properties['b'], new Property('b', new ObjectType(Type::class)));
+        $this->assertEquals($properties['c'], new Property('c', new ObjectType(IntegerType::class)));
+        $this->assertEquals($properties['d'], new Property('d', new ObjectType(FloatType::class)));
+        $this->assertEquals($properties['e'], new Property('e', new ObjectType(ObjectType::class)));
+        $this->assertEquals($properties['f'], new Property('f', new ObjectType(Precious::class)));
+        $this->assertEquals($properties['h'], new Property('h', new ObjectType(C::class)));
     }
 }

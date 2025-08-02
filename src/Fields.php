@@ -19,7 +19,7 @@ class Fields implements Iterator
     public function __construct(private readonly array $fields) {
         $this->position = 0;
         self::ensureUniqueNames(
-            array_map(function($field) { return $field->name(); }, $fields)
+            array_map(fn($field) => $field->name(), $fields)
         );
     }
 
