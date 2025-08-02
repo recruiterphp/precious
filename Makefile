@@ -20,6 +20,9 @@ install:
 test: up
 	docker compose exec php vendor/bin/phpunit
 
+phpstan: up
+	docker compose exec php vendor/bin/phpstan
+
 # Run unit tests specifically
 test-unit: up
 	docker compose exec php vendor/bin/phpunit tests/unit
