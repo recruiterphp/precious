@@ -3,3 +3,4 @@ composer.lock
 /vendor/
 !.project.org
 !.gitignore
+!.github
