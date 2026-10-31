@@ -13,7 +13,7 @@
     "php": "^8.4"
   },
   "require-dev": {
-    "ergebnis/composer-normalize": "^2.47",
+    "ergebnis/composer-normalize": "^2.56",
     "nikic/php-parser": "^5.6",
     "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^12.3",
